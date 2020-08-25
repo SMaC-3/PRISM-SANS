@@ -1,0 +1,11 @@
+Import data into MATLAB as a .mat file with your data in the form: q, I(q), Error I(q). Ensure that the file type is set to numeric matrix.
+If the data is imported as a table, it will not be read properly by the code. In the Workspace, your file should be a size x size DOUBLE.
+
+Type in the imported file name into the filename line of code within the quotation marks. filename = 'your_filename'
+Copy this name and paste it in the data code line so that it reads 
+data = your_filename;
+
+Run the code to ensure a figure appears with your data and the default model.
+Adjust the UI Parameters towards the top of the code to manually fit your data.
+
+Currently there is no implementation of Levenberg-Marquardt or any fitting routines.
