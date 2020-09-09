@@ -18,3 +18,6 @@ Adjust the UI Parameters towards the top of the code to manually fit your data.
 Currently there is no implementation of Levenberg-Marquardt or any fitting routines.
 
 The output q, I(q) values from the PRISM fit are stored in a variable called sprism.
+
+You can edit the graph axes and settings in the 'figures' section down the bottom of the code, or you could pull the values from the sprism variable and plot them 
+in your favourite graphing software :) (Matlab looks pretty good though)
