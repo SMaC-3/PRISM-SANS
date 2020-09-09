@@ -196,7 +196,9 @@ if B~=0
         sprism(1,g) = form(1,g)*(pvals(1,g)/(1+bc(qvals(1,g))*pvals(1,g)));
         strucfac(2,g) = 1/(1+bc(qvals(1,g))*pvals(1,g));
     end
-    sprism = volume*1e-4*contrast*A*sprism;
+    sprism = volume*1e-4*contrast*A*sprism(1,:);
+    sprism(2,:) = sprism(1,:);
+    sprism(1,:) = pvals(1,:);
 end
 pvals = volume*1e-4*contrast*A*pvals;
 
@@ -216,7 +218,7 @@ xlabel("\bf{q (" + Ang + "^{-1})}");
 ylabel("\bf{Intensity (cm^{-1})}");
 
 errorbar(data(:,1),data(:,2),data(:,3),'black','marker','s','linewidth',2,'linestyle','none')
-plot(qvals(1,1:112),sprism(1,1:112)+BD,'Color',[0 0.5 1],'Linewidth',4)
+plot(qvals(1,1:112),sprism(2,1:112)+BD,'Color',[0 0.5 1],'Linewidth',4)
 legend("Data","Model")
 
 residual = data(:,1);
@@ -224,7 +226,7 @@ chisq = 0;
 for i = 1:size(residual,1)
     exp = data(i,2);
     err = data(i,3);
-    fit = sprism(1,i)+BD;
+    fit = sprism(2,i)+BD;
     residual(i,2) = ((exp)-(fit))/(err);
     chisq = chisq + (exp-fit)^2/err^2;
 end
@@ -243,3 +245,5 @@ text(0.00115,-0.7,txt)
 
 plot(residual(:,1),residual(:,2),'x')
 hold off
+
+sprism = sprism';
