@@ -48,7 +48,7 @@ end
 dist_r = dist_r/max(dist_r); %Normalise the distribution weights.
 
 
-%---------------------------Other-Constansts-------------------------------
+%---------------------------Other-Constants-------------------------------
 contrast = (SLD-SLD_solv)^2; % Del ro^2
 volume = 3.1416*r_cs^2*L;
 
@@ -91,7 +91,7 @@ S_exv_new = @(q) ((1-w(q*r_gsq))*S_debye(q));
 P_CS = @(q) ((2*besselj(1,q*r_cs))/(q*r_cs))^2; 
 
 %------------Calculate-a_long-values-for-correction-function---------------
-%NOTE: Translated from c-source code which is poorly commented. 
+%NOTE: Translated from c-source code.
 %This is hard to decipher what each term means.
 
 p1 = 4.12;
