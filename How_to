@@ -17,14 +17,7 @@ Adjust the UI Parameters towards the top of the code to manually fit your data.
 
 Currently there is no implementation of Levenberg-Marquardt or any fitting routines.
 
-The output q, I(q) values from the PRISM fit are stored in a variable called sprism.
+The output q, I(q) values from the PRISM fit are stored in a matrix called scattering.
 
-You can edit the graph axes and settings in the 'figures' section down the bottom of the code, or you could pull the values from the sprism variable and plot them 
-in your favourite graphing software :) (Matlab looks pretty good though).
-
-Limitations:
-1) This code assumes that your wormlike micelles (or polymer chains) have a contour length that is 4x greater than the kuhn length, otherwise they look more rodlike 
-than wormlike. 
-2) Currently only has schulz polydispersity implemented
-3) PRISM is a semi-empirical model, derived from Monte Carlo simulations by Cannavacciuolo et. al. (doi/10.1021/la010884f) and corrected by Chen et. al 
-(10.1021/la0530440).
+You can edit the graph axes and settings in the 'figures' section down the bottom of the code, or you could pull the values from the 'scattering' matrix
+and plot them in your favourite graphing software :) (Matlab looks pretty nice though).
