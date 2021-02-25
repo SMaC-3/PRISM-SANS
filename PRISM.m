@@ -1,5 +1,5 @@
 % Polymer reference interaction site model (PRISM), for modelling of 
-% worm-like micelle/polymer solutions. Written by Ashley Williams, 2019-2020.
+% worm-like micelle/polymer solutions. Written by Ashley Williams, 2019-2021.
 % 
 % Adapted from SASView C-source code.
 %
@@ -13,18 +13,18 @@ clear
 %
 Ang = char(197);
 %--------------------------------load--------------------------------------
-filename = '';%Insert file name (.mat)
+filename = 'test';%Insert file name (.mat)
 load(filename);
-data = ;%filename (no quotations)
+data = test;%filename (no quotations)
 %---------------------------UI-Parameters----------------------------------
 
 A = 1;            % Overall Scale.
 r_cs = 20;        % Cross-sectional Radius
 BD = 0.001;       % Background.
 L = 1000;         % Contour Length
-B = 0.001;          % Peak scale, 0 = no structure factor: NOTE: EITHER MAKE REALLY SMALL OR USE FC MODEL for no Structure factor.
-b = 100;          % Kuhn Length 
-SLD = 1;          % Scattering length density - Cylinder
+B = 0.00001;          % Peak scale, 0 = no structure factor: NOTE: EITHER MAKE REALLY SMALL OR USE FC MODEL for no Structure factor.
+b = 100 ;          % Kuhn Length 
+SLD = 0.5;          % Scattering length density - Cylinder
 SLD_solv = 6.3;   % Scattering length density - solvent
 sigma = 1;       % Unknown fit parameter for PRISM
 r_eff = 20;       %Effective radius
@@ -48,7 +48,7 @@ end
 dist_r = dist_r/max(dist_r); %Normalise the distribution weights.
 
 
-%---------------------------Other-Constants-------------------------------
+%---------------------------Other-Constansts-------------------------------
 contrast = (SLD-SLD_solv)^2; % Del ro^2
 volume = 3.1416*r_cs^2*L;
 
@@ -63,7 +63,7 @@ end
 alpha = @(x) sqrt((1+(x/3.12)^2 + (x/8.67)^3)^(0.176/3));
 
 % "Rgsquareshort(L,b),<Rg^2>_0"
-% r_g0 = ((L*b)/6)*(1-(3/(2*n_b))+(3/(2*(n_b)^2))-(3/(4*(n_b)^3))*(1-exp(-2*n_b)));
+r_g0 = (((alpha(n_b)^2)*L*b)/6.0)*(1.0+(b/L)*(-1.5 + (b/L)*(1.5 + (b/L)*0.75*(exp(-2/n_b)-1))));
 
 % "Rgsquare(L,b), <Rg^2>"
 r_g = (alpha(n_b)^2)*((b*L)/6);
@@ -76,10 +76,12 @@ r_gsq = sqrt(r_g);
 %"w_WR(x)
 w = @(x) (1+tanh((x-1.523)/0.1477))/2;
 
-u = @(q) r_g*(q^2);
+u = @(q) r_g*q^2;
+u_short = @(q) ((r_g0^0.5)*q)^2;
 
 %Debye scattering
 S_debye = @(q) 2*(exp(-u(q))+u(q)-1)/u(q)^2;
+S_debye_short = @(q) 2.*(exp(-u_short(q))+u_short(q)-1)/u_short(q)^2;
 
 %Excluded volume scattering
 S_exv = @(q) ((1-w(q*r_gsq))*S_debye(q))+(w(q*r_gsq)*(1.22*(q*r_gsq)^(-1/0.585)+0.4288*(q*r_gsq)^(-2/0.585)-1.651*(q*r_gsq)^(-3/0.585)));
@@ -91,7 +93,7 @@ S_exv_new = @(q) ((1-w(q*r_gsq))*S_debye(q));
 P_CS = @(q) ((2*besselj(1,q*r_cs))/(q*r_cs))^2; 
 
 %------------Calculate-a_long-values-for-correction-function---------------
-%NOTE: Translated from c-source code.
+%NOTE: Translated from c-source code which is poorly commented. 
 %This is hard to decipher what each term means.
 
 p1 = 4.12;
@@ -128,6 +130,45 @@ a2 = t1*(q0^(-p1))*(t12+b*p1/q0*t13);
 
 a = @(q) a1*((q*b)^(-p1))+ a2*((q*b)^(-p2))+ pi/(q*L);
 
+
+%-----------------------------a_short--------------------------------------
+p1short = 5.36;
+p2short = 5.62;
+pdiff = p1short-p2short;
+r2 = r_g0;
+q0short = max(1.9/(r_g0^0.5),3);
+exp_qr_b = exp(r2*(q0short/b)^2);
+qr2 = q0short*q0short*r2;
+b3 = b^3;
+
+q0p = q0short^(-4+p1short);
+
+a1short = ((1.0/(L*r2*r2))*(b/exp_qr_b*q0p)*...
+    (8.0*b3*L ...
+    - 8.0*b3*exp_qr_b*L ...
+    + 2.0*b3*exp_qr_b*L*p2short...
+    - 2.0*b*exp_qr_b*L*p2short*qr2 ...
+    + 4.0*b*exp_qr_b*L*qr2...
+    - 2.0*b3*L*p2short ...
+    + 4.0*b*L*qr2 ...
+    - pi*exp_qr_b*qr2*q0short*r2...
+    + pi*exp_qr_b*p2short*qr2*q0short*r2))/pdiff;
+
+q0p = q0short^(-4+p2short);
+
+a2short = -((1.0/(L*r2*r2))*(b/exp_qr_b*q0p)*...
+    (8.0*b3*L ...
+    - 8.0*b3*exp_qr_b*L ...
+    + 2.0*b3*exp_qr_b*L*p1short...
+    - 2.0*b*exp_qr_b*L*p1short*qr2...
+    + 4.0*b*exp_qr_b*L*qr2...
+    - 2.0*b3*L*p1short...
+    + 4.0*b*L*qr2 ...
+    - pi*exp_qr_b*qr2*q0short*r2...
+    + pi*exp_qr_b*p1short*qr2*q0short*r2))/pdiff;
+
+a_short = @(q) a1short*((q*b)^(-p1short))+ a2short*((q*b)^(-p2short))+ pi/(q*L);
+
 %-------------------------Piecewise-Functions------------------------------
 
 
@@ -161,14 +202,10 @@ for h = 1:(size(qrange,2)-1)%compute scattering values.
                 pvals(i,h) = (a(qvals(1,h)));
             end
         else
-            if qvalue*b <= max(1.9/r_gsq,3)
-                pvals(i,h) = (S_debye(qvals(1,h))+ (c(n_b)/n_b)*(4/15 + 7/(15*u(qvals(1,h)))-(11/15 + 7/(15*u(qvals(1,h))))*exp(-u(qvals(1,h)))));
+            if qvalue*b <= q0short
+                pvals(i,h) = S_debye_short(qvals(1,h));
             else
-                %use a_short from c code
-
-                %This case does not concern us as this is for WLMs with a 
-                %Contour length less than 4x the Kuhn length. This occurs at
-                %low concentrations and is not relevant at the present time.
+                pvals(i,h) =  a_short(qvals(1,h));
             end
         end
     end
@@ -196,9 +233,10 @@ if B~=0
         sprism(1,g) = form(1,g)*(pvals(1,g)/(1+bc(qvals(1,g))*pvals(1,g)));
         strucfac(2,g) = 1/(1+bc(qvals(1,g))*pvals(1,g));
     end
-    sprism = volume*1e-4*contrast*A*sprism(1,:);
-    sprism(2,:) = sprism(1,:);
-    sprism(1,:) = pvals(1,:);
+    sprism = volume*1e-4*contrast*A*sprism;
+    scattering(1,:) = qvals(1,:);
+    scattering(2,:) = sprism(1,:)+BD;
+    
 end
 pvals = volume*1e-4*contrast*A*pvals;
 
@@ -218,19 +256,19 @@ xlabel("\bf{q (" + Ang + "^{-1})}");
 ylabel("\bf{Intensity (cm^{-1})}");
 
 errorbar(data(:,1),data(:,2),data(:,3),'black','marker','s','linewidth',2,'linestyle','none')
-plot(qvals(1,1:112),sprism(2,1:112)+BD,'Color',[0 0.5 1],'Linewidth',4)
+plot(scattering(1,2:size(scattering,2)-1),scattering(2,2:size(scattering,2)-1),'Color',[0 0.5 1],'Linewidth',4)
 legend("Data","Model")
 
 residual = data(:,1);
 chisq = 0;
-for i = 1:size(residual,1)
+for i = 2:size(residual,1)-1
     exp = data(i,2);
     err = data(i,3);
-    fit = sprism(2,i)+BD;
+    fit = scattering(2,i);
     residual(i,2) = ((exp)-(fit))/(err);
     chisq = chisq + (exp-fit)^2/err^2;
 end
-r_chisq = chisq/size(sprism,2);
+r_chisq = chisq/size(scattering,2);
 
 subplot(3,1,3)
 hold on 
@@ -241,9 +279,8 @@ ylim([-3 3])
 xlabel("{\it q} (" + Ang + "^{-1})");
 ylabel("Normalised Residuals" );
 txt = ("{\bf \chi_R ^2 = }"+r_chisq);
-text(0.00115,-0.7,txt)
+text(0.11e-2,2,txt)
 
 plot(residual(:,1),residual(:,2),'x')
 hold off
-
-sprism = sprism';
+scattering = scattering';
