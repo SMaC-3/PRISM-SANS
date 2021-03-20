@@ -4,20 +4,24 @@ Run PRISM.m in Matlab. It may ask you to change the folder, this is Matlab just 
 In the 'workspace' tab click the dropdown arrow then click 'new'. Double click the new selection and paste in your data with the columns: q, I(q), Error I(q).
   This should save it as a 'double' type, which is what we need. If you find it is stored as a 'table', this will not be read properly by the code.
 Alternatively, you can copy your data then click the dropdown button in the workspace and click 'paste'. This will bring up a new box, and you will need to 
-make sure it saves as a 'numeric matrix'. Then once you're done, click 'Import' and it should show up in the workspace.
+make sure it saves as a 'numerical matrix'. Then once you're done, click 'Import' and it should show up in the workspace.
 
 Before you run your code, make sure you save the file you just created into the same directory as the PRISM.m code otherwise it won't be able to be read.
 
-Type in the imported file name into the filename line of code within the quotation marks. filename = 'your_filename'
+Type in the imported file name into the filename line of code within the quotation marks. filename = 'yourfilename_here'
 Copy this name and paste it in the data code line so that it reads 
-data = your_filename;
+data = yourfilename_here;
 
 Run the code to ensure a figure appears with your data and the default model.
-Adjust the UI Parameters towards the top of the code to manually fit your data.
+To fit Manually (suggested to begin with):
+- Set LM_fit = 0.
+- Adjust the UI Parameters to obtain an initial guess.
 
-Currently there is no implementation of Levenberg-Marquardt or any fitting routines.
+To fit with Levenberg–Marquardt:
+- set LM_fit = 1.
+- Fit!
 
-The output q, I(q) values from the PRISM fit are stored in a matrix called scattering.
+The output q, I(q) values from the PRISM fit are stored in a matrix called 'PRISMfit'.
+The parameters for the fit can be found in a matrix called 'PRISM_parameters'.
 
-You can edit the graph axes and settings in the 'figures' section down the bottom of the code, or you could pull the values from the 'scattering' matrix
-and plot them in your favourite graphing software :) (Matlab looks pretty nice though).
+If you have any code suggestions or questions, please mail Ashley.Williams@monash.edu or Rico.Tabor@monash.edu
