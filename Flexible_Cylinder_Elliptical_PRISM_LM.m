@@ -198,7 +198,7 @@ dist_r = dist_r/max(dist_r); %Normalise the distribution weights.
 %==========================================================================
 
 contrast = (SLD-SLD_solv).^2; % Del ro^2
-volume = pi*(r_cs*axis_ratio)^2*L;
+volume = pi*(r_cs*axis_ratio)*r_cs*L;
 
 n_b = L./b;
 
